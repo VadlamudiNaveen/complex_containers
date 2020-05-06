@@ -1,0 +1,18 @@
+language: generic
+sudo: required
+services:
+    - docker
+before-install:
+    - docker build -t naveenvadlamudi176/test -f  ./client/Dockerfile.dev  ./client
+script:
+    - docker run -e CI=true naveenvadlamudi176/test npm test -- --coverage
+after_success:
+    - docker build -t naveenvadlamudi176/multi-client ./client
+    - docker build -t naveenvadlamudi176/multi-worker ./worker
+    - docker build -t naveenvadlamudi176/multi-server ./server
+    - docker build -t naveenvadlamudi176/multi-nginx  ./nginx
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+    - docker push naveenvadlamudi176/multi-client
+    - docker push naveenvadlamudi176/multi-worker
+    - docker push naveenvadlamudi176/multi-server
+    - docker push naveenvadlamudi176/multi-nginx
